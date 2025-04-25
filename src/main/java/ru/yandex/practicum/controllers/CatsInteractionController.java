@@ -12,6 +12,7 @@ public class CatsInteractionController {
     @GetMapping("/converse")
     public Map<String, String> converse() {
         happiness++;
+        checkHappiness();
         return Map.of("talk", "Мяу");
     }
 
@@ -25,6 +26,7 @@ public class CatsInteractionController {
         }
 
         happiness += count;
+        checkHappiness();
         return Map.of("talk", "Муррр. ".repeat(count));
     }
 
@@ -45,5 +47,19 @@ public class CatsInteractionController {
     public Map<String, String> handleRuntimeException(final RuntimeException e) {
         // возвращаем сообщение об ошибке
         return Map.of("error", "Произошла ошибка!");
+    }
+
+    @ExceptionHandler
+    public Map<String, String> handleHappinessOverflow(final HappinessOverflowException e) {
+        return Map.of(
+                "error", "Осторожно, вы так избалуете пёсика!",
+                "happinessLevel", String.valueOf(e.getHappinessLevel())
+        );
+    }
+
+    private void checkHappiness() {
+        if (happiness > 10) {
+            throw new HappinessOverflowException(happiness);
+        }
     }
 }
