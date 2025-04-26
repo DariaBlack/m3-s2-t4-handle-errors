@@ -7,27 +7,27 @@ import java.util.Map;
 @RestController
 @RequestMapping("/dogs")
 public class DogsInteractionController {
+    // добавьте поле owner
     private int happiness = 0;
+    private String owner;
+
+    // добавьте эндпоинт POST /owner с параметром newOwner
+    // метод должен называться setOwner
+
+    @PostMapping("/owner")
+    public Map<String, String> setOwner(@RequestParam(required = false) final String newOwner) {
+        if (newOwner == null) {
+            throw new IncorrectParameterException("Параметр newOwner равен null.");
+        }
+        this.owner = newOwner;
+        return Map.of("owner", newOwner);
+    }
 
     @GetMapping("/converse")
     public Map<String, String> converse() {
+        checkHappiness();
         happiness += 2;
-        checkHappiness();
         return Map.of("talk", "Гав!");
-    }
-
-    @GetMapping("/pet")
-    public Map<String, String> pet(@RequestParam(required = false) final Integer count) {
-        if (count == null) {
-            throw new IncorrectCountException("Параметр count равен null.");
-        }
-        if (count <= 0) {
-            throw new IncorrectCountException("Параметр count имеет отрицательное значение.");
-        }
-
-        happiness += count;
-        checkHappiness();
-        return Map.of("action", "Вильнул хвостом. ".repeat(count));
     }
 
     @GetMapping("/happiness")
@@ -35,26 +35,32 @@ public class DogsInteractionController {
         return Map.of("happiness", happiness);
     }
 
-    @ExceptionHandler
-    public Map<String, String> handle(final IncorrectCountException e) {
-        return Map.of(
-                "error", "Ошибка с параметром count.",
-                "errorMessage", e.getMessage()
-        );
-    }
+    @PutMapping("/pet")
+    public Map<String, String> pet(
+            @RequestParam(required = false) final Integer count,
+            @RequestParam(required = false) final String user
+    ) {
+        // добавьте необходимые проверки
+        if (owner == null) {
+            throw new IncorrectParameterException("Необходимо установить параметр owner.");
+        }
+        if (user == null) {
+            throw new IncorrectParameterException("Параметр user равен null.");
+        }
+        if (!user.equals(owner)) {
+            throw new UnauthorizedUserException(user, owner);
+        }
+        if (count == null) {
+            throw new IncorrectParameterException("Параметр count равен null.");
+        }
+        if (count <= 0) {
+            throw new IncorrectParameterException("Параметр count имеет отрицательное значение.");
+        }
 
-    @ExceptionHandler
-    public Map<String, String> handleRuntimeException(final RuntimeException e) {
-        // возвращаем сообщение об ошибке
-        return Map.of("error", "Произошла ошибка!");
-    }
+        checkHappiness();
 
-    @ExceptionHandler
-    public Map<String, String> handleHappinessOverflow(final HappinessOverflowException e) {
-        return Map.of(
-                "error", "Осторожно, вы так избалуете пёсика!",
-                "happinessLevel", String.valueOf(e.getHappinessLevel())
-        );
+        happiness += count;
+        return Map.of("action", "Вильнул хвостом. ".repeat(count));
     }
 
     private void checkHappiness() {

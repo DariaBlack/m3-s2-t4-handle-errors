@@ -1,14 +1,14 @@
 package ru.yandex.practicum.controllers;
 
 public class HappinessOverflowException extends RuntimeException {
-    private final int hapinessLevel;
+    private Integer happinessLevel;
 
-    public HappinessOverflowException(int happinessLevel) {
+    public HappinessOverflowException(Integer happinessLevel) {
         super("Осторожно, вы так избалуете питомца!");
-        this.hapinessLevel = happinessLevel;
+        this.happinessLevel = happinessLevel;
     }
 
-  public int getHappinessLevel() {
-    return hapinessLevel;
-  }
+    public Integer getHappinessLevel() {
+        return happinessLevel;
+    }
 }
